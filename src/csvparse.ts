@@ -4,9 +4,9 @@ import { finished } from 'stream/promises';
 import { args } from './args';
 
 export type Region = {
-    vivodeship: string;
-    community: string;
+    voivodeship: string;
     county: string;
+    municipality: string;
     type: string;
     typeId: number;
     name: string;
@@ -15,11 +15,11 @@ export type Region = {
 
 function toTitleCase(str: String) {
     return str.split(' ')
-    .map(w => w[0].toUpperCase() + w.substring(1).toLowerCase())
-    .join(' ')
-    .split('-')
-    .map(w => w[0].toUpperCase() + w.substring(1))
-    .join('-')
+        .map(w => w[0].toUpperCase() + w.substring(1).toLowerCase())
+        .join(' ')
+        .split('-')
+        .map(w => w[0].toUpperCase() + w.substring(1))
+        .join('-')
 
 }
 export async function parseCsv() {
@@ -31,7 +31,7 @@ export async function parseCsv() {
             skip_empty_lines: true,
             record_delimiter: '\r\n',
             columns: () => {
-                return ["vivodeship", "community", "county", "typeId", "name", "type", "date"]
+                return ["voivodeship", "county", "municipality", "typeId", "name", "type", "date"]
             },
         }))
         .on('readable', function () {

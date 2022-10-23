@@ -23,7 +23,21 @@ var (
     fs.writeFileSync(args.output + "/go/data.go", data)
 }
 
+function genTypescript(c: Computed) {
+    const voivodeships = JSON.stringify(c.voivodeships)
+    const communities = Object.entries(c.communities).map(data => `["${data[0]}", ${JSON.stringify(data[1])}]`).join(",")
+    const counties = Object.entries(c.counties).map(data => `["${data[0]}", ${JSON.stringify(data[1])}]`).join(",")
+
+    const data = `
+export const voivodeships: Array<string> = ${voivodeships}
+export const communities = new Map<string,Array<string>>([${communities}])
+export const counties = new Map<string,Array<string>>([${counties}])
+`
+    fs.writeFileSync(args.output + "/typescript/data.ts", data)
+}
+
 export function generate(c: Computed) {
     genJson(c)
     genGo(c)
+    genTypescript(c)
 }

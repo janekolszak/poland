@@ -55,6 +55,5 @@ export function compute(regions: Array<Region>): Computed {
             })
     })
 
-    console.log(out)
     return out
 }

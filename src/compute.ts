@@ -31,14 +31,29 @@ export function compute(regions: Array<Region>): Computed {
         })
 
     // Gminy
-    const communitiesIdMap: Map<string, string> = new Map(regions.filter(r => r.type === "powiat").map(r => [r.community, r.name]))
-    regions.filter(r => r.county !== "" && r.type !== "województwo" && r.type !== "powiat")
-        .forEach(r => {
-            const v = communitiesIdMap.get(r.vivodeship)
-            let d = out.counties[v!]
-            d = d ? d : []
-            out.counties[v!] = [...d, `${r.name} (${r.type})`  ]
-        })
+    out.voivodeships.forEach(vivodeship => {
+        const communitiesIdMap: Map<string, string> = new Map(
+            regions
+                .filter(r => vivIdMap.get(r.vivodeship) === vivodeship)
+                .filter(r => r.type === "powiat" || r.type.indexOf("na prawach powiatu") >= 0)
+                .map(r => [r.community, r.name])
+        )
+        regions
+            .filter(r => vivIdMap.get(r.vivodeship) === vivodeship)
+            .filter(r => r.county !== "")
+            .filter(r => r.type !== "województwo")
+            .filter(r => r.type !== "powiat")
+            .filter(r => r.type.indexOf("na prawach powiatu") === -1)
+            .forEach(r => {
+                const v = communitiesIdMap.get(r.community)
+                let d = out.counties[v!]
+                d = d ? d : []
+                if (d.includes(r.name)) {
+                    return
+                }
+                out.counties[v!] = [...d, r.name]
+            })
+    })
 
     console.log(out)
     return out

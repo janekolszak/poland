@@ -1,0 +1,34 @@
+{
+  "name": "regions",
+  "version": "0.0.1",
+  "description": "Administrative division of Poland",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "parse": "./node_modules/ts-node/dist/bin.js ./index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/janekolszak/regions.git"
+  },
+  "keywords": [
+    "vivodeship",
+    "community",
+    "county",
+    "gmina",
+    "powiat",
+    "województwo"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/janekolszak/regions/issues"
+  },
+  "homepage": "https://github.com/janekolszak/regions#readme",
+  "devDependencies": {
+    "@types/node": "^18.11.3",
+    "csv": "^6.2.1",
+    "ts-command-line-args": "^2.3.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {}
+}

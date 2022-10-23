@@ -1,10 +1,10 @@
 import { Region } from "./csvparse"
 
-interface NamesMap {
+export interface NamesMap {
     [postcode: string]: Array<string>
 };
 
-interface Computed {
+export interface Computed {
     voivodeships: string[]
     communities: NamesMap
     counties: NamesMap
@@ -37,7 +37,7 @@ export function compute(regions: Array<Region>): Computed {
             const v = communitiesIdMap.get(r.vivodeship)
             let d = out.counties[v!]
             d = d ? d : []
-            out.counties[v!] = [...d, r.name]
+            out.counties[v!] = [...d, `${r.name} (${r.type})`  ]
         })
 
     console.log(out)

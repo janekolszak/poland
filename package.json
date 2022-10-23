@@ -1,5 +1,5 @@
 {
-  "name": "regions",
+  "name": "poland",
   "version": "0.0.1",
   "description": "Administrative division of Poland",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/janekolszak/regions.git"
+    "url": "git+https://github.com/janekolszak/poland.git"
   },
   "keywords": [
     "vivodeship",
@@ -20,9 +20,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/janekolszak/regions/issues"
+    "url": "https://github.com/janekolszak/poland/issues"
   },
-  "homepage": "https://github.com/janekolszak/regions#readme",
+  "homepage": "https://github.com/janekolszak/poland#readme",
   "devDependencies": {
     "@types/node": "^18.11.3",
     "csv": "^6.2.1",

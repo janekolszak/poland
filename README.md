@@ -12,3 +12,15 @@ This repository parses the official polish names from the official source (https
 npm i
 npm run generate
 ```
+
+# Install
+
+### Typescript
+```
+npm i @janekolszak/poland
+```
+
+### Golang
+```
+go get github.com/janekolszak/poland
+```

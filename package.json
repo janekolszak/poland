@@ -1,10 +1,10 @@
 {
   "name": "@janekolszak/poland",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Administrative division of Poland",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate": "./node_modules/ts-node/dist/bin.js ./index.ts -o ./generated -i ./TERC_Urzedowy_2022-10-22.csv"
+    "generate": "./node_modules/ts-node/dist/bin.js ./index.ts -o ./generated -i ./TERC_Urzedowy_2023-01-01.csv"
   },
   "repository": {
     "type": "git",

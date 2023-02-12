@@ -2,6 +2,7 @@ import { parse } from 'ts-command-line-args';
 
 export interface Args {
     input: string;
+    localities: string;
     output: string;
     help?: boolean;
 }
@@ -9,6 +10,7 @@ export interface Args {
 export const args = parse<Args>(
     {
         input: { type: String, alias: 'i', description: 'Input TERC CSV as downloaded from https://eteryt.stat.gov.pl/eTeryt/rejestr_teryt/udostepnianie_danych/baza_teryt/uzytkownicy_indywidualni/pobieranie/pliki_pelne.aspx' },
+        localities: { type: String, alias: 'l', description: 'Input SIMC CSV as downloaded from https://eteryt.stat.gov.pl/eTeryt/rejestr_teryt/udostepnianie_danych/baza_teryt/uzytkownicy_indywidualni/pobieranie/pliki_pelne.aspx' },
         output: { type: String, alias: 'o', description: 'Output file path' },
         help: { type: Boolean, optional: true, alias: 'h', description: 'Prints this usage guide' },
     },

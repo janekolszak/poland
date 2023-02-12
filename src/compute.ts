@@ -1,4 +1,5 @@
 import { Region } from "./csvparse"
+import ManyKeysMap from 'many-keys-map';
 
 export interface NamesMap {
     [postcode: string]: Array<string>
@@ -8,14 +9,19 @@ export interface Computed {
     voivodeships: string[]
     counties: NamesMap
     municipalities: NamesMap
+    localities: ManyKeysMap<string[], string>
 }
 
-export function compute(regions: Array<Region>): Computed {
+export function compute(regions: Array<Region>, localities: Array<Region>): Computed {
     let out: Computed = {
         voivodeships: [],
         counties: {},
         municipalities: {},
+        localities: new ManyKeysMap()
     }
+
+    const countyIdMap = new ManyKeysMap();
+    const municipalityIdMap = new ManyKeysMap();
 
     // Województwa
     out.voivodeships = regions.filter(r => r.type === "województwo").map(r => r.name)
@@ -28,8 +34,10 @@ export function compute(regions: Array<Region>): Computed {
             let d = out.counties[v!]
             d = d ? d : []
             out.counties[v!] = [...d, r.name]
-        })
 
+            countyIdMap.set([r.voivodeship, r.county], r.name)
+        })
+        
     // Gminy
     out.voivodeships.forEach(voivodeship => {
         const countiesIdMap: Map<string, string> = new Map(
@@ -52,8 +60,13 @@ export function compute(regions: Array<Region>): Computed {
                     return
                 }
                 out.municipalities[v!] = [...d, r.name]
+
+                municipalityIdMap.set([r.voivodeship, r.county, r.municipality], r.name)
             })
     })
+
+    // Miejscowosci
+
 
     return out
 }

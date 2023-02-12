@@ -4,7 +4,7 @@
   "description": "Administrative division of Poland",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate": "./node_modules/ts-node/dist/bin.js ./index.ts -o ./generated -i ./TERC_Urzedowy_2023-02-12.csv"
+    "generate": "./node_modules/ts-node/dist/bin.js ./index.ts -o ./generated -i ./TERC_Urzedowy_2023-02-12.csv -l ./SIMC_Adresowy_2023-02-12.csv"
   },
   "repository": {
     "type": "git",
@@ -31,5 +31,8 @@
     "typescript": "^4.8.4"
   },
   "main": "index.ts",
-  "author": "Jan Olszak"
+  "author": "Jan Olszak",
+  "dependencies": {
+    "many-keys-map": "^2.0.0"
+  }
 }

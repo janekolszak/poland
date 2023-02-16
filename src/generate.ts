@@ -6,6 +6,9 @@ function genJson(c: Computed) {
     fs.writeFileSync(args.output + "/json/voivodeships.json", JSON.stringify(c.voivodeships))
     fs.writeFileSync(args.output + "/json/counties.json", JSON.stringify(c.counties))
     fs.writeFileSync(args.output + "/json/municipalities.json", JSON.stringify(c.municipalities))
+    fs.writeFileSync(args.output + "/json/localities.json", JSON.stringify(c.localities.Get3Deep()))
+    fs.writeFileSync(args.output + "/json/districts.json", JSON.stringify(c.districts.Get4Deep()))
+
 }
 
 function genGo(c: Computed) {

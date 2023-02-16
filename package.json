@@ -4,7 +4,7 @@
   "description": "Administrative division of Poland",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate": "./node_modules/ts-node/dist/bin.js ./index.ts -o ./generated -i ./TERC_Urzedowy_2023-02-12.csv -l ./SIMC_Adresowy_2023-02-12.csv"
+    "generate": "tsc && node ./dist/index.js -o ./generated -i ./TERC_Urzedowy_2023-02-12.csv -l ./SIMC_Urzedowy_2023-02-12.csv -t ./WMRODZ_2023-02-12.csv"
   },
   "repository": {
     "type": "git",
@@ -16,7 +16,8 @@
     "county",
     "gmina",
     "powiat",
-    "województwo"
+    "województwo",
+    "miasto"
   ],
   "license": "MIT",
   "bugs": {
@@ -33,6 +34,7 @@
   "main": "index.ts",
   "author": "Jan Olszak",
   "dependencies": {
+    "@final-hill/multi-key-map": "^1.1.4",
     "many-keys-map": "^2.0.0"
   }
 }

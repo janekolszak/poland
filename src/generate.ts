@@ -12,18 +12,20 @@ function genJson(c: Computed) {
 }
 
 function genGo(c: Computed) {
-    const voivodeships = c.voivodeships.map(v => `"${v}"`).join(",")
-    const counties = JSON.stringify(c.counties).replace(/[\[]+/g, "{").replace(/[\]']+/g, "}")
-    const municipalities = JSON.stringify(c.municipalities).replace(/[\[]+/g, "{").replace(/[\]']+/g, "}")
-
+    fs.copyFileSync(args.output + "/json/voivodeships.json", args.output + "/go/voivodeships.json")
+    fs.copyFileSync(args.output + "/json/counties.json", args.output + "/go/counties.json")
+    fs.copyFileSync(args.output + "/json/municipalities.json", args.output + "/go/municipalities.json")
+    fs.copyFileSync(args.output + "/json/localities.json", args.output + "/go/localities.json")
+    fs.copyFileSync(args.output + "/json/districts.json", args.output + "/go/districts.json")
     const data = `package poland
-
-var (
-    Voivodeships = []string{${voivodeships}}
-    Counties = map[string][]string${counties}
-    Municipalities = map[string][]string${municipalities}
-)`
-    fs.writeFileSync(args.output + "/go/data.go", data)
+import (
+    "embed"
+)
+    
+//go:embed *.json
+var FS embed.FS
+`
+    fs.writeFileSync(args.output + "/go/root.go", data)
 }
 
 function genTypescript(c: Computed) {

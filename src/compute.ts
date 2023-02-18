@@ -19,7 +19,7 @@ export interface NamesMapFourKeys {
 export interface Computed {
     voivodeships: string[]
     counties: NamesMap
-    municipalities: NamesMap
+    municipalities: MultiKeyMap
     localities: MultiKeyMap
     districts: MultiKeyMap
 }
@@ -28,7 +28,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
     let out: Computed = {
         voivodeships: [],
         counties: {},
-        municipalities: {},
+        municipalities: new MultiKeyMap(),
         localities: new MultiKeyMap(),
         districts: new MultiKeyMap()
     }
@@ -54,30 +54,23 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
         })
 
     // Gminy
-    out.voivodeships.forEach(voivodeship => {
-        const countiesIdMap: Map<string, string> = new Map(
-            regions
-                .filter(r => vivIdMap.get(r.voivodeship) === voivodeship)
-                .filter(r => r.type === "powiat" || r.type.indexOf("na prawach powiatu") >= 0)
-                .map(r => [r.county, r.name])
-        )
-        regions
-            .filter(r => vivIdMap.get(r.voivodeship) === voivodeship)
-            .filter(r => r.county !== "")
-            .filter(r => r.municipality !== "")
-            .filter(r => r.type.startsWith("gmina"))
-            .forEach(r => {
-                const v = countiesIdMap.get(r.county)
-                let d = out.municipalities[v!]
-                d = d ? d : []
-                if (!d.includes(r.name)) {
-                    out.municipalities[v!] = [...d, r.name]
-                }
+    regions
+        .filter(r => r.voivodeship !== "")
+        .filter(r => r.county !== "")
+        .filter(r => r.municipality !== "")
+        .filter(r => r.type.startsWith("gmina"))
+        .forEach(r => {
+            const v = vivIdMap.get(r.voivodeship)
+            const c = countyIdMap.get([r.voivodeship, r.county])
 
-                municipalityIdMap.set([r.voivodeship, r.county, r.municipality], r.name)
-            })
-    })
+            let d = out.municipalities.get([v, c]) as Array<string>
+            d = d ? d : []
+            if (!d.includes(r.name)) {
+                out.municipalities.set([v, c], [...d, r.name])
+            }
 
+            municipalityIdMap.set([r.voivodeship, r.county, r.municipality], r.name)
+        })
 
 
     // Miejscowosci
@@ -106,12 +99,8 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
             if (!d.includes(r.name)) {
                 out.localities.set([v, c, m], [...d, r.name])
                 out.districts.set([v, c, m, r.name], [])
-
             }
         })
-
-    out.localities.sortValues()
-    // console.log(out.localities)
 
     // Dzielnice
     const allLocalitiesIdMap = new Map(localities.map(r => [r.localityId, r.name]))
@@ -190,5 +179,11 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
             out.districts.set([v, c, m, l], [...d, name])
         })
     // console.log(out.districts)
+
+
+    out.municipalities.sortValues()
+    out.localities.sortValues()
+    out.districts.sortValues()
+
     return out
 }

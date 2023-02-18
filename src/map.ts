@@ -56,6 +56,21 @@ export class MultiKeyMap {
         }
     }
 
+    Get2Deep(): NamesMapTwoKeys {
+        var out: NamesMapTwoKeys = {}
+        this.forEach((keys, value) => {
+            const [v, c] = keys
+            if (!out[v]) {
+                out[v] = {}
+            }
+            if (!out[v][c]) {
+                out[v][c] = []
+            }
+            out[v][c].push(value)
+        })
+        return out
+    }
+
     Get3Deep(): NamesMapThreeKeys {
         var out: NamesMapThreeKeys = {}
         this.forEach((keys, value) => {

@@ -63,10 +63,7 @@ export class MultiKeyMap {
             if (!out[v]) {
                 out[v] = {}
             }
-            if (!out[v][c]) {
-                out[v][c] = []
-            }
-            out[v][c].push(value)
+            out[v][c] = value
         })
         return out
     }
@@ -81,10 +78,7 @@ export class MultiKeyMap {
             if (!out[v][c]) {
                 out[v][c] = {}
             }
-            if (!out[v][c][m]) {
-                out[v][c][m] = []
-            }
-            out[v][c][m].push(value)
+            out[v][c][m] = value
         })
         return out
     }
@@ -102,10 +96,7 @@ export class MultiKeyMap {
             if (!out[v][c][m]) {
                 out[v][c][m] = {}
             }
-            if (!out[v][c][m][l]) {
-                out[v][c][m][l] = []
-            }
-            out[v][c][m][l].push(value)
+            out[v][c][m][l] = value
         })
         return out
     }

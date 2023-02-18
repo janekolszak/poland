@@ -72,6 +72,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
             municipalityIdMap.set([r.voivodeship, r.county, r.municipality], r.name)
         })
 
+    console.log(out.municipalities.Get2Deep())
 
     // Miejscowosci
     let localityTypeIds = [

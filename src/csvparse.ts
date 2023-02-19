@@ -28,6 +28,20 @@ export type Locality = {
     date: string;
 };
 
+// WOJ;POW;GMI;RODZ_GMI;SYM;SYM_UL;CECHA;NAZWA_1;NAZWA_2;STAN_NA
+export type Street = {
+    voivodeship: string
+    county: string;
+    municipality: string;
+    municipalityTypeId: string;
+    localityId: string;
+    streenId: string;
+    characteristic: string;
+    name: string;
+    restName: string
+    date: string;
+};
+
 export type LocalityType = {
     id: string;
     name: string;
@@ -100,6 +114,30 @@ export async function parseLocalityTypeCsv() {
             record_delimiter: '\r\n',
             columns: () => {
                 return ["id", "name", "date"]
+            },
+        }))
+        .on('readable', function () {
+            let record; while ((record = parser.read()) !== null) {
+                // Work with each record
+                // record.name = toTitleCase(record.name)
+                records.push(record);
+            }
+        });
+    await finished(parser);
+    return records;
+};
+
+export async function parseStreetsCsv() {
+    const records: Street[] = [];
+    const parser = fs
+        .createReadStream(args.streets)
+        .pipe(parse({
+            relax_quotes: true,
+            delimiter: ';',
+            skip_empty_lines: true,
+            record_delimiter: '\r\n',
+            columns: () => {
+                return ["voivodeship", "county", "municipality", "municipalityTypeId", "localityId", "streenId", "characteristic", "name", "restName", "date"]
             },
         }))
         .on('readable', function () {

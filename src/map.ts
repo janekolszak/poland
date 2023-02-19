@@ -1,4 +1,4 @@
-import { NamesMapThreeKeys, NamesMapFourKeys, NamesMapTwoKeys } from "./compute";
+import { NamesMapThreeKeys, NamesMapFourKeys, NamesMapTwoKeys, NamesMapFiveKeys } from "./compute";
 
 export class MultiKeyMap {
     private map: Record<string, any> = {};
@@ -97,6 +97,27 @@ export class MultiKeyMap {
                 out[v][c][m] = {}
             }
             out[v][c][m][l] = value
+        })
+        return out
+    }
+    
+    Get5Deep(): NamesMapFiveKeys {
+        var out: NamesMapFiveKeys = {}
+        this.forEach((keys, value) => {
+            const [v, c, m, l, d] = keys
+            if (!out[v]) {
+                out[v] = {}
+            }
+            if (!out[v][c]) {
+                out[v][c] = {}
+            }
+            if (!out[v][c][m]) {
+                out[v][c][m] = {}
+            }
+            if (!out[v][c][m][l]) {
+                out[v][c][m][l] = {}
+            }
+            out[v][c][m][l][d] = value
         })
         return out
     }

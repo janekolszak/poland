@@ -1,4 +1,4 @@
-import { LocalityType, Region, Locality } from "./csvparse"
+import { LocalityType, Region, Locality, Street } from "./csvparse"
 import { MultiKeyMap } from "./map"
 
 export interface NamesMap {
@@ -12,8 +12,13 @@ export interface NamesMapTwoKeys {
 export interface NamesMapThreeKeys {
     [postcode: string]: NamesMapTwoKeys
 };
+
 export interface NamesMapFourKeys {
     [postcode: string]: NamesMapThreeKeys
+};
+
+export interface NamesMapFiveKeys {
+    [postcode: string]: NamesMapFourKeys
 };
 
 export interface Computed {
@@ -22,15 +27,28 @@ export interface Computed {
     municipalities: MultiKeyMap
     localities: MultiKeyMap
     districts: MultiKeyMap
+    streetsLocalities: MultiKeyMap
+    streetsDistricts: MultiKeyMap
 }
 
-export function compute(regions: Array<Region>, localities: Array<Locality>, localityTypes: Array<LocalityType>): Computed {
+// RODZ_GMI
+// 1 - gmina miejska,
+// 2 - gmina wiejska,
+// 3 - gmina miejsko-wiejska,
+// 4 - miasto w gminie miejsko-wiejskiej,
+// 5 - obszar wiejski w gminie miejsko-wiejskiej,
+// 8 - dzielnica w m.st. Warszawa,
+// 9 - delegatury miast: Kraków, Łódź, Poznań i Wrocław
+
+export function compute(regions: Array<Region>, localities: Array<Locality>, localityTypes: Array<LocalityType>, streets: Array<Street>): Computed {
     let out: Computed = {
         voivodeships: [],
         counties: {},
         municipalities: new MultiKeyMap(),
         localities: new MultiKeyMap(),
-        districts: new MultiKeyMap()
+        districts: new MultiKeyMap(),
+        streetsLocalities: new MultiKeyMap(),
+        streetsDistricts: new MultiKeyMap()
     }
 
     const locTypeIdMap: Map<string, string> = new Map(localityTypes.map(r => [r.name, r.id]))
@@ -72,8 +90,6 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
             municipalityIdMap.set([r.voivodeship, r.county, r.municipality], r.name)
         })
 
-    console.log(out.municipalities.Get2Deep())
-
     // Miejscowosci
     let localityTypeIds = [
         locTypeIdMap.get("wieś"),
@@ -104,7 +120,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
         })
 
     // Dzielnice
-    const allLocalitiesIdMap = new Map(localities.map(r => [r.localityId, r.name]))
+    const allLocalitiesIdMap = new Map(localities.map(r => [r.localityId, r]))
 
     let districtIds = [
         locTypeIdMap.get("dzielnica"),
@@ -121,7 +137,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
             const v = vivIdMap.get(r.voivodeship)
             const c = countyIdMap.get([r.voivodeship, r.county])
             const m = municipalityIdMap.get([r.voivodeship, r.county, r.municipality])
-            const l = allLocalitiesIdMap.get(r.baseLocalityId)
+            const l = allLocalitiesIdMap.get(r.baseLocalityId)?.name
 
             if (!v || !c || !m || !l) {
                 // console.error("Missing voivodeship, county, municipality or base locality for district: " + r.name + " (" + v + ", " + c + ", " + m + ", " + l + ")")
@@ -179,12 +195,105 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
             d = d ? d : []
             out.districts.set([v, c, m, l], [...d, name])
         })
-    // console.log(out.districts)
+
+    // Ulice w miejscowosciach
+    let districtMunicipalityIds = ["8", "9"]
+    streets
+        .filter(r => !districtMunicipalityIds.includes(r.municipalityTypeId))
+        .forEach(r => {
+            const v = vivIdMap.get(r.voivodeship)
+            const c = countyIdMap.get([r.voivodeship, r.county])
+            const m = municipalityIdMap.get([r.voivodeship, r.county, r.municipality])
+            const l = allLocalitiesIdMap.get(r.localityId)
+
+            if (!v || !c || !m || !l) {
+                console.error("4 Missing voivodeship, county, municipality or base locality for district: " + r.name + " (" + v + ", " + c + ", " + m + ", " + l + ")")
+                console.error(r.voivodeship, r.county, r.municipality)
+                return
+            }
+
+            const fullName = r.name + " " + r.restName
+
+            if (districtIds.includes(l.localityTypeId)) {
+                const d = out.districts.get([v, c, m, l.name])
+                if (!d) {
+                    console.error("Missing district: " + r.name)
+                    return
+                }
+
+                let s = out.streetsDistricts.get([v, c, m, l.name, d])
+                s = s ? s : []
+                if (!s.includes(fullName)) {
+                    out.streetsDistricts.set([v, c, m, l.name, d], [...s, fullName])
+                }
+            } else {
+                let s = out.streetsLocalities.get([v, c, m, l.name])
+                s = s ? s : []
+                if (!s.includes(fullName)) {
+                    out.streetsLocalities.set([v, c, m, l.name], [...s, fullName])
+                }
+            }
+        })
+
+    // Ulice w dzielnicach Warszawy
+    streets
+        .filter(r => r.municipalityTypeId === "8")
+        .forEach(r => {
+            const v = vivIdMap.get(r.voivodeship)
+            const c = countyIdMap.get([r.voivodeship, r.county])
+            const m = "Warszawa"
+            const l = "Warszawa"
+            const d = allLocalitiesIdMap.get(r.localityId)?.name
 
 
+            if (!v || !c || !m || !l || !d) {
+                console.error("4 Missing voivodeship, county, municipality or base locality for district: " + r.name + " (" + v + ", " + c + ", " + m + ", " + l + ")")
+                console.error(r.voivodeship, r.county, r.municipality)
+                return
+            }
+
+            let s = out.streetsDistricts.get([v, c, m, l, d])
+            s = s ? s : []
+            const fullName = r.name + " " + r.restName
+
+            if (!s.includes(fullName)) {
+                out.streetsDistricts.set([v, c, m, l, d], [...s, fullName])
+            }
+        })
+
+    // Ulice w delegaturach miast
+    streets
+        .filter(r => r.municipalityTypeId === "9")
+        .forEach(r => {
+            const v = vivIdMap.get(r.voivodeship)
+            const c = countyIdMap.get([r.voivodeship, r.county])
+
+            const name = allLocalitiesIdMap.get(r.localityId)?.name
+            const d = name?.substring(name.indexOf('-') + 1)
+            const m = name?.substring(0, name?.indexOf('-'))
+            const l = name?.substring(0, name?.indexOf('-'))
+
+            if (!v || !c || !m || !l || !d) {
+                console.error("4 Missing voivodeship, county, municipality or base locality for district: " + r.name + " (" + v + ", " + c + ", " + m + ", " + l + ")")
+                console.error(r.voivodeship, r.county, r.municipality)
+                return
+            }
+
+            let s = out.streetsDistricts.get([v, c, m, l, d])
+            s = s ? s : []
+            const fullName = r.name + " " + r.restName
+            if (!s.includes(fullName)) {
+                out.streetsDistricts.set([v, c, m, l, d], [...s, fullName])
+            }
+        })
+
+    // Sort all lists
     out.municipalities.sortValues()
     out.localities.sortValues()
     out.districts.sortValues()
+    out.streetsLocalities.sortValues()
+    out.streetsDistricts.sortValues()
+
 
     return out
 }

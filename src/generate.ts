@@ -8,6 +8,8 @@ function genJson(c: Computed) {
     fs.writeFileSync(args.output + "/json/municipalities.json", JSON.stringify(c.municipalities.Get2Deep()))
     fs.writeFileSync(args.output + "/json/localities.json", JSON.stringify(c.localities.Get3Deep()))
     fs.writeFileSync(args.output + "/json/districts.json", JSON.stringify(c.districts.Get4Deep()))
+    fs.writeFileSync(args.output + "/json/streetsInLocalities.json", JSON.stringify(c.streetsLocalities.Get4Deep()))
+    fs.writeFileSync(args.output + "/json/streetsInDistricts.json", JSON.stringify(c.streetsDistricts.Get5Deep()))
 
 }
 
@@ -17,6 +19,8 @@ function genGo(c: Computed) {
     fs.copyFileSync(args.output + "/json/municipalities.json", args.output + "/go/municipalities.json")
     fs.copyFileSync(args.output + "/json/localities.json", args.output + "/go/localities.json")
     fs.copyFileSync(args.output + "/json/districts.json", args.output + "/go/districts.json")
+    fs.copyFileSync(args.output + "/json/streetsInLocalities.json", args.output + "/go/streetsInLocalities.json")
+    fs.copyFileSync(args.output + "/json/streetsInDistricts.json", args.output + "/go/streetsInDistricts.json")
     const data = `package poland
 import (
     "embed"

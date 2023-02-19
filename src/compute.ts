@@ -31,6 +31,13 @@ export interface Computed {
     streetsDistricts: MultiKeyMap
 }
 
+
+const getFullName = (f: string, s: string): string => {
+    if (!s || s === "") {
+        return f
+    }
+    return f + " " + s
+}
 // RODZ_GMI
 // 1 - gmina miejska,
 // 2 - gmina wiejska,
@@ -212,7 +219,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
                 return
             }
 
-            const fullName = r.name + " " + r.restName
+            const fullName = getFullName(r.name, r.restName)
 
             if (districtIds.includes(l.localityTypeId)) {
                 const d = out.districts.get([v, c, m, l.name])
@@ -254,7 +261,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
 
             let s = out.streetsDistricts.get([v, c, m, l, d])
             s = s ? s : []
-            const fullName = r.name + " " + r.restName
+            const fullName = getFullName(r.name, r.restName)
 
             if (!s.includes(fullName)) {
                 out.streetsDistricts.set([v, c, m, l, d], [...s, fullName])
@@ -281,7 +288,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
 
             let s = out.streetsDistricts.get([v, c, m, l, d])
             s = s ? s : []
-            const fullName = r.name + " " + r.restName
+            const fullName = getFullName(r.name, r.restName)
             if (!s.includes(fullName)) {
                 out.streetsDistricts.set([v, c, m, l, d], [...s, fullName])
             }

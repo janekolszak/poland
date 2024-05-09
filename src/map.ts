@@ -1,4 +1,4 @@
-import { NamesMapThreeKeys, NamesMapFourKeys, NamesMapTwoKeys, NamesMapFiveKeys } from "./compute";
+import { NamesMap, NamesMapFiveKeys, NamesMapFourKeys, NamesMapThreeKeys, NamesMapTwoKeys } from "./compute";
 
 export class MultiKeyMap {
     private map: Record<string, any> = {};
@@ -45,6 +45,8 @@ export class MultiKeyMap {
         for (const strKey in this.map) {
             let value = this.map[strKey];
             value.sort()
+            // value.sort((a: string, b: string) => b.localeCompare(a))
+            this.map[strKey] = value
         }
     }
 
@@ -54,6 +56,20 @@ export class MultiKeyMap {
             const keys = strKey.split('|');
             callbackfn(keys, value, this);
         }
+    }
+
+    Get1Deep(): NamesMap {
+        var out: NamesMap = {}
+        this.forEach((keys, value) => {
+            const [v] = keys
+            if (!out[v]) {
+                out[v] = []
+            }
+            out[v] = value
+        })
+
+        console.log("AAA", out)
+        return out
     }
 
     Get2Deep(): NamesMapTwoKeys {
@@ -100,7 +116,7 @@ export class MultiKeyMap {
         })
         return out
     }
-    
+
     Get5Deep(): NamesMapFiveKeys {
         var out: NamesMapFiveKeys = {}
         this.forEach((keys, value) => {

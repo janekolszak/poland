@@ -1,10 +1,10 @@
-import { args } from "./args"
-import { Computed } from "./compute"
 import fs from 'fs';
+import { args } from "./args";
+import { Computed } from "./compute";
 
 function genJson(c: Computed) {
     fs.writeFileSync(args.output + "/json/voivodeships.json", JSON.stringify(c.voivodeships))
-    fs.writeFileSync(args.output + "/json/counties.json", JSON.stringify(c.counties))
+    fs.writeFileSync(args.output + "/json/counties.json", JSON.stringify(c.counties.Get1Deep()))
     fs.writeFileSync(args.output + "/json/municipalities.json", JSON.stringify(c.municipalities.Get2Deep()))
     fs.writeFileSync(args.output + "/json/localities.json", JSON.stringify(c.localities.Get3Deep()))
     fs.writeFileSync(args.output + "/json/districts.json", JSON.stringify(c.districts.Get4Deep()))
@@ -34,7 +34,7 @@ var FS embed.FS
 
 function genTypescript(c: Computed) {
     const voivodeships = JSON.stringify(c.voivodeships)
-    const counties = Object.entries(c.counties).map(data => `["${data[0]}", ${JSON.stringify(data[1])}]`).join(",")
+    const counties = Object.entries(c.counties.Get1Deep()).map(data => `["${data[0]}", ${JSON.stringify(data[1])}]`).join(",")
 
     const data = `
 export const voivodeships: Array<string> = ${voivodeships}

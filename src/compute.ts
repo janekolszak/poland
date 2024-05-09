@@ -1,4 +1,4 @@
-import { LocalityType, Region, Locality, Street } from "./csvparse"
+import { Locality, LocalityType, Region, Street } from "./csvparse"
 import { MultiKeyMap } from "./map"
 
 export interface NamesMap {
@@ -23,7 +23,7 @@ export interface NamesMapFiveKeys {
 
 export interface Computed {
     voivodeships: string[]
-    counties: NamesMap
+    counties: MultiKeyMap
     municipalities: MultiKeyMap
     localities: MultiKeyMap
     districts: MultiKeyMap
@@ -50,7 +50,7 @@ const getFullName = (f: string, s: string): string => {
 export function compute(regions: Array<Region>, localities: Array<Locality>, localityTypes: Array<LocalityType>, streets: Array<Street>): Computed {
     let out: Computed = {
         voivodeships: [],
-        counties: {},
+        counties: new MultiKeyMap(),
         municipalities: new MultiKeyMap(),
         localities: new MultiKeyMap(),
         districts: new MultiKeyMap(),
@@ -71,9 +71,9 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
     regions.filter(r => r.municipality === "" && r.type !== "województwo")
         .forEach(r => {
             const v = vivIdMap.get(r.voivodeship)
-            let d = out.counties[v!]
+            let d = out.counties.get([v!])
             d = d ? d : []
-            out.counties[v!] = [...d, r.name]
+            out.counties.set([v!], [...d, r.name])
 
             countyIdMap.set([r.voivodeship, r.county], r.name)
         })
@@ -296,11 +296,11 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
 
     // Sort all lists
     out.municipalities.sortValues()
+    out.counties.sortValues()
     out.localities.sortValues()
     out.districts.sortValues()
     out.streetsLocalities.sortValues()
     out.streetsDistricts.sortValues()
-
 
     return out
 }

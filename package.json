@@ -4,7 +4,7 @@
   "description": "Administrative division of Poland",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate": "tsc && node ./dist/index.js -o ./generated -i ./data/2024-05-09/TERC_Urzedowy.csv -l ./data/2024-05-09/SIMC_Urzedowy.csv -t ./data/2024-05-09/WMRODZ.csv -s ./data/2024-05-09/ULIC_Adresowy.csv"
+    "generate": "tsc && node ./dist/index.js -o ./generated -i ./data/2026-07-22/TERC_Urzedowy.csv -l ./data/2026-07-22/SIMC_Urzedowy.csv -t ./data/2026-07-22/WMRODZ.csv -s ./data/2026-07-22/ULIC_Adresowy.csv"
   },
   "repository": {
     "type": "git",

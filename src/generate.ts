@@ -11,6 +11,11 @@ function genJson(c: Computed) {
     fs.writeFileSync(args.output + "/json/streetsInLocalities.json", JSON.stringify(c.streetsLocalities.Get4Deep()))
     fs.writeFileSync(args.output + "/json/streetsInDistricts.json", JSON.stringify(c.streetsDistricts.Get5Deep()))
 
+    // Deliberately not copied into generated/go: root.go embeds *.json with a wildcard, and the
+    // only consumer is an offline importer joining PRG boundaries to name paths - no server needs
+    // TERYT at runtime. It still ships inside the Go module, readable at
+    // $(go list -m -f '{{.Dir}}' github.com/janekolszak/poland)/generated/json/teryt.json
+    fs.writeFileSync(args.output + "/json/teryt.json", JSON.stringify(c.teryt))
 }
 
 function genGo(c: Computed) {

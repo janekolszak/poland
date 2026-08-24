@@ -29,6 +29,15 @@ export interface Computed {
     districts: MultiKeyMap
     streetsLocalities: MultiKeyMap
     streetsDistricts: MultiKeyMap
+    teryt: Teryt
+}
+
+// Teryt maps a name path ("Dolnośląskie/Bolesławiecki/Bolesławiec") to the register codes it was
+// built from, so a consumer holding only names can join to data keyed by TERYT - PRG boundary
+// shapefiles key on the 7-digit TERC code. Not 1:1: 142 municipality paths are a
+// gmina miejska + gmina wiejska pair sharing one name, hence the array.
+export interface Teryt {
+    [namePath: string]: Array<string>
 }
 
 
@@ -55,7 +64,8 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
         localities: new MultiKeyMap(),
         districts: new MultiKeyMap(),
         streetsLocalities: new MultiKeyMap(),
-        streetsDistricts: new MultiKeyMap()
+        streetsDistricts: new MultiKeyMap(),
+        teryt: {}
     }
 
     const locTypeIdMap: Map<string, string> = new Map(localityTypes.map(r => [r.name, r.id]))
@@ -63,8 +73,20 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
     const countyIdMap = new MultiKeyMap();
     const municipalityIdMap = new MultiKeyMap();
 
+    // Codes are prefixed with their register: TERC 7-digit municipality codes and SIMC locality
+    // codes share a numeric range, so bare codes would be ambiguous.
+    const putTeryt = (path: string[], code: string) => {
+        const codes = out.teryt[path.join('/')] ??= []
+        if (!codes.includes(code)) {
+            codes.push(code)
+        }
+    }
+
     // Województwa
-    out.voivodeships = regions.filter(r => r.type === "województwo").map(r => r.name)
+    out.voivodeships = regions.filter(r => r.type === "województwo").map(r => {
+        putTeryt([r.name], "TERC:" + r.voivodeship)
+        return r.name
+    })
 
     // Powiaty
     const vivIdMap: Map<string, string> = new Map(regions.filter(r => r.type === "województwo").map(r => [r.voivodeship, r.name]))
@@ -76,6 +98,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
             out.counties.set([v!], [...d, r.name])
 
             countyIdMap.set([r.voivodeship, r.county], r.name)
+            putTeryt([v!, r.name], "TERC:" + r.voivodeship + r.county)
         })
 
     // Gminy
@@ -95,6 +118,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
             }
 
             municipalityIdMap.set([r.voivodeship, r.county, r.municipality], r.name)
+            putTeryt([v!, c, r.name], "TERC:" + r.voivodeship + r.county + r.municipality + r.typeId)
         })
 
     // Miejscowosci
@@ -124,6 +148,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
                 out.localities.set([v, c, m], [...d, r.name])
                 out.districts.set([v, c, m, r.name], [])
             }
+            putTeryt([v, c, m, r.name], "SIMC:" + r.localityId)
         })
 
     // Dzielnice
@@ -156,8 +181,11 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
             d = d ? d : []
             if (r.baseLocalityId === r.localityId) {
                 out.districts.set([v, c, m, l], [...d])
-            } else if (!d.includes(r.name)) {
-                out.districts.set([v, c, m, l], [...d, r.name])
+            } else {
+                if (!d.includes(r.name)) {
+                    out.districts.set([v, c, m, l], [...d, r.name])
+                }
+                putTeryt([v, c, m, l, r.name], "SIMC:" + r.localityId)
             }
         })
 
@@ -179,6 +207,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
             let d = out.districts.get([v, c, m, l]) as Array<string>
             d = d ? d : []
             out.districts.set([v, c, m, l], [...d, r.name])
+            putTeryt([v!, c, m, l, r.name], "TERC:" + r.voivodeship + r.county + r.municipality + r.typeId)
         })
 
 
@@ -201,6 +230,7 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
             let d = out.districts.get([v, c, m, l]) as Array<string>
             d = d ? d : []
             out.districts.set([v, c, m, l], [...d, name])
+            putTeryt([v!, c, m, l, name], "TERC:" + r.voivodeship + r.county + r.municipality + r.typeId)
         })
 
     // Ulice w miejscowosciach
@@ -301,6 +331,26 @@ export function compute(regions: Array<Region>, localities: Array<Locality>, loc
     out.districts.sortValues()
     out.streetsLocalities.sortValues()
     out.streetsDistricts.sortValues()
+    Object.values(out.teryt).forEach(codes => codes.sort())
+
+    // Every name path the trees expose has to resolve to a code, otherwise an importer joining on
+    // TERYT drops that region without a word.
+    let checked = 0
+    const missing: string[] = []
+    const require = (path: string[]) => {
+        checked++
+        if (!out.teryt[path.join('/')]) {
+            missing.push(path.join('/'))
+        }
+    }
+    out.voivodeships.forEach(v => require([v]))
+    for (const tree of [out.counties, out.municipalities, out.localities, out.districts]) {
+        tree.forEach((keys, names) => (names as Array<string>).forEach(n => require([...keys, n])))
+    }
+    if (missing.length) {
+        throw new Error(missing.length + " name paths without a TERYT code, e.g. " + missing.slice(0, 5).join(", "))
+    }
+    console.log("teryt: " + Object.keys(out.teryt).length + " name paths, " + checked + " checked")
 
     return out
 }
